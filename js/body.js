@@ -85,6 +85,53 @@ const BodyPage = {
         <button class="btn btn-primary" id="body-save-btn">기록 저장</button>
       </div>
 
+      <!-- 데이터 가져오기 -->
+      <div class="card" style="border-color:rgba(74,222,128,0.2);">
+        <div class="card-header" style="margin-bottom:10px;">
+          <span class="card-title">📥 데이터 연동</span>
+        </div>
+
+        <!-- Bluetooth 체중계 -->
+        <div class="sync-section">
+          <div class="sync-section-title">🔵 Bluetooth 체중계</div>
+          <p class="sync-desc">Bluetooth LE 체중계(샤오미 Mi Scale, Withings, Garmin Index 등)를 직접 연결해 측정값을 가져옵니다.<br><span class="text-dim">Chrome / Edge 브라우저만 지원</span></p>
+          <button class="btn btn-ghost" id="bt-connect-btn" onclick="BodyPage.connectBluetooth()">
+            🔗 체중계 연결하기
+          </button>
+          <div id="bt-result" style="margin-top:8px;"></div>
+        </div>
+
+        <div class="sync-divider"></div>
+
+        <!-- 삼성헬스 내보내기 -->
+        <div class="sync-section">
+          <div class="sync-section-title">📱 삼성헬스 가져오기</div>
+          <p class="sync-desc">삼성헬스 앱 → 설정 → 개인 데이터 다운로드 → ZIP 파일 업로드<br>또는 압축 해제 후 <code>body_composition</code> CSV 파일을 업로드하세요.</p>
+          <label class="btn btn-ghost" style="cursor:pointer;display:inline-flex;">
+            📂 삼성헬스 파일 선택 (.zip / .csv)
+            <input type="file" accept=".zip,.csv" id="sh-body-file" style="display:none;" onchange="BodyPage.importFile(this)">
+          </label>
+          <div id="sh-body-result" style="margin-top:8px;"></div>
+        </div>
+
+        <div class="sync-divider"></div>
+
+        <!-- 일반 CSV (인바디, 기타) -->
+        <div class="sync-section">
+          <div class="sync-section-title">📊 인바디 / 일반 CSV 가져오기</div>
+          <p class="sync-desc">인바디 앱, 핏빗, 체지방계 앱 등에서 내보낸 CSV 파일을 업로드하세요.<br>
+          <span class="text-dim">컬럼 예: 날짜, 체중, 체지방률, 골격근량, BMI</span></p>
+          <a href="#" class="text-dim" style="font-size:11px;" onclick="BodyPage.downloadSampleCSV(event)">샘플 CSV 양식 다운로드</a>
+          <div style="margin-top:8px;">
+            <label class="btn btn-ghost" style="cursor:pointer;display:inline-flex;">
+              📂 CSV 파일 선택
+              <input type="file" accept=".csv,.txt" id="generic-body-file" style="display:none;" onchange="BodyPage.importGenericFile(this)">
+            </label>
+          </div>
+          <div id="generic-body-result" style="margin-top:8px;"></div>
+        </div>
+      </div>
+
       <!-- 기록 리스트 -->
       <div class="card-header mt-16">
         <span class="card-title">📋 체중 기록</span>
@@ -520,5 +567,136 @@ const BodyPage = {
     this.renderSummary();
     this.renderChart();
     this.renderList();
+  },
+
+  // ── Bluetooth 체중계 연결 ───────────────────────────────────
+  async connectBluetooth() {
+    const btn    = document.getElementById('bt-connect-btn');
+    const result = document.getElementById('bt-result');
+    if (!btn || !result) return;
+
+    btn.disabled = true;
+    btn.textContent = '⏳ 기기 검색 중...';
+    result.innerHTML = '';
+
+    try {
+      const data = await Sync.connectBluetoothScale();
+
+      // 측정값 미리보기 + 저장 확인
+      const weightStr  = data.weight  ? `체중: ${data.weight.toFixed(2)}kg` : '';
+      const fatStr     = data.fat     ? ` · 체지방: ${data.fat}%` : '';
+      const bmiStr     = data.bmi     ? ` · BMI: ${data.bmi}` : '';
+      const previewMsg = [weightStr, fatStr, bmiStr].filter(Boolean).join('');
+
+      result.innerHTML = `
+        <div class="sync-preview">
+          <div class="sync-preview-value">${previewMsg}</div>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button class="btn btn-primary" style="flex:1;" onclick="BodyPage._saveBtData(${JSON.stringify(data)})">저장하기</button>
+            <button class="btn btn-ghost" style="flex:1;" onclick="document.getElementById('bt-result').innerHTML=''">취소</button>
+          </div>
+        </div>`;
+    } catch (err) {
+      if (err.name === 'NotFoundError') {
+        result.innerHTML = `<p class="sync-error">기기 선택이 취소되었습니다.</p>`;
+      } else {
+        result.innerHTML = `<p class="sync-error">⚠️ ${escapeHTML(err.message)}</p>`;
+      }
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '🔗 체중계 연결하기';
+    }
+  },
+
+  _saveBtData(data) {
+    if (!data.weight) { showToast('체중 데이터가 없습니다.'); return; }
+    Storage.add('body', {
+      date: todayStr(),
+      weight:   data.weight,
+      fat:      data.fat    || null,
+      muscle:   data.muscle || null,
+      bmi:      data.bmi    || null,
+      water:    null,
+      visceral: null,
+      memo: '(Bluetooth 체중계)',
+    });
+    document.getElementById('bt-result').innerHTML =
+      `<p class="sync-success">✅ 저장되었습니다.</p>`;
+    showToast('✅ 체중계 측정값이 저장되었습니다.');
+    this.renderProfile();
+    this.renderComparison();
+    this.renderSummary();
+    this.renderChart();
+    this.renderList();
+  },
+
+  // ── 삼성헬스 ZIP / CSV 가져오기 ────────────────────────────
+  async importFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const result = document.getElementById('sh-body-result');
+    result.innerHTML = `<p class="text-dim" style="font-size:12px;">⏳ 처리 중...</p>`;
+
+    try {
+      let res;
+      if (file.name.toLowerCase().endsWith('.zip')) {
+        const zipRes = await Sync.importSamsungZip(file);
+        res = zipRes.body;
+        // 운동 데이터도 가져왔으면 알림
+        if (zipRes.exercise.success > 0) {
+          showToast(`운동 ${zipRes.exercise.success}건도 가져왔습니다.`);
+        }
+      } else {
+        const text = await file.text();
+        res = Sync.importSamsungBody(text);
+      }
+
+      result.innerHTML = `<p class="sync-success">✅ ${res.success}건 추가 / ${res.skip}건 건너뜀</p>`;
+      if (res.success > 0) {
+        showToast(`✅ 체중 데이터 ${res.success}건을 가져왔습니다.`);
+        this.renderProfile(); this.renderComparison();
+        this.renderSummary(); this.renderChart(); this.renderList();
+      }
+    } catch (err) {
+      result.innerHTML = `<p class="sync-error">⚠️ ${escapeHTML(err.message)}</p>`;
+    }
+    input.value = '';
+  },
+
+  // ── 일반 CSV 가져오기 ────────────────────────────────────────
+  async importGenericFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const result = document.getElementById('generic-body-result');
+    result.innerHTML = `<p class="text-dim" style="font-size:12px;">⏳ 처리 중...</p>`;
+
+    try {
+      const text = await file.text();
+      const res  = Sync.importGenericBody(text);
+      result.innerHTML = `<p class="sync-success">✅ ${res.success}건 추가 / ${res.skip}건 건너뜀</p>`;
+      if (res.success > 0) {
+        showToast(`✅ ${res.success}건을 가져왔습니다.`);
+        this.renderProfile(); this.renderComparison();
+        this.renderSummary(); this.renderChart(); this.renderList();
+      } else {
+        result.innerHTML += `<p class="sync-error" style="margin-top:4px;">컬럼을 인식하지 못했습니다. 샘플 CSV 양식을 참고해주세요.</p>`;
+      }
+    } catch (err) {
+      result.innerHTML = `<p class="sync-error">⚠️ ${escapeHTML(err.message)}</p>`;
+    }
+    input.value = '';
+  },
+
+  // ── 샘플 CSV 다운로드 ────────────────────────────────────────
+  downloadSampleCSV(e) {
+    e.preventDefault();
+    const csv = '날짜,체중,체지방률,골격근량,BMI,체수분,내장지방\n2026-01-01,75.30,28.50,29.80,24.30,35.20,8\n2026-01-08,74.80,28.10,30.00,24.10,35.40,7\n';
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '핏저니_체중_샘플.csv';
+    a.click();
   },
 };

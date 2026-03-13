@@ -75,6 +75,21 @@ const ExercisePage = {
         <button class="btn btn-primary" id="ex-save-btn">기록 저장</button>
       </div>
 
+      <!-- 운동 데이터 가져오기 -->
+      <div class="card" style="border-color:rgba(74,222,128,0.2);">
+        <div class="card-header" style="margin-bottom:10px;">
+          <span class="card-title">📥 삼성헬스 운동 가져오기</span>
+        </div>
+        <div class="sync-section">
+          <p class="sync-desc">삼성헬스 앱 → 설정 → 개인 데이터 다운로드 → ZIP 파일 업로드<br>또는 <code>exercise</code> CSV 파일을 직접 업로드하세요.<br><span class="text-dim">런닝·걷기·자전거·웨이트·수영 자동 변환</span></p>
+          <label class="btn btn-ghost" style="cursor:pointer;display:inline-flex;">
+            📂 파일 선택 (.zip / .csv)
+            <input type="file" accept=".zip,.csv" id="sh-exercise-file" style="display:none;" onchange="ExercisePage.importFile(this)">
+          </label>
+          <div id="sh-exercise-result" style="margin-top:8px;"></div>
+        </div>
+      </div>
+
       <!-- 운동 기록 리스트 -->
       <div class="card-header mt-16">
         <span class="card-title">📋 운동 기록</span>
@@ -406,5 +421,38 @@ const ExercisePage = {
     showToast('삭제되었습니다.');
     this.renderSummary();
     this.renderList();
+  },
+
+  // ── 삼성헬스 운동 ZIP / CSV 가져오기 ───────────────────────
+  async importFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const result = document.getElementById('sh-exercise-result');
+    result.innerHTML = `<p class="text-dim" style="font-size:12px;">⏳ 처리 중...</p>`;
+
+    try {
+      let res;
+      if (file.name.toLowerCase().endsWith('.zip')) {
+        const zipRes = await Sync.importSamsungZip(file);
+        res = zipRes.exercise;
+        if (zipRes.body.success > 0) {
+          showToast(`체중 데이터 ${zipRes.body.success}건도 가져왔습니다.`);
+        }
+      } else {
+        const text = await file.text();
+        res = Sync.importSamsungExercise(text);
+      }
+
+      result.innerHTML = `<p class="sync-success">✅ ${res.success}건 추가 / ${res.skip}건 건너뜀</p>`;
+      if (res.success > 0) {
+        showToast(`✅ 운동 기록 ${res.success}건을 가져왔습니다.`);
+        this.renderSummary();
+        this.renderList();
+      }
+    } catch (err) {
+      result.innerHTML = `<p class="sync-error">⚠️ ${escapeHTML(err.message)}</p>`;
+    }
+    input.value = '';
   },
 };
