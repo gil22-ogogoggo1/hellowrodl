@@ -444,8 +444,8 @@ git push → master
 GitHub Actions (.github/workflows/ci.yml)
     │
     ├── Job 1: test (Jest)
-    │   ├── npm ci
-    │   ├── npm run test:ci (--coverage)
+    │   ├── npm install
+    │   ├── npm run test:ci (--coverage, 73개 테스트)
     │   └── upload coverage artifact
     │
     ├── Job 2: validate (HTML)
@@ -453,9 +453,18 @@ GitHub Actions (.github/workflows/ci.yml)
     │   ├── 필수 스크립트 로드 확인 (storage.js, app.js, Chart.js CDN)
     │   └── JS 로드 순서 검증 (Python 스크립트)
     │
-    └── Job 3: deploy (test + validate 통과 시)
+    └── Job 3: deploy (test + validate 통과 시, master push 한정)
         ├── _site/ 디렉토리 생성
         ├── fitjourney.html, index.html, css/, js/ 복사
-        └── peaceiris/actions-gh-pages → gh-pages 브랜치
-            → https://gil22-ogogogogo1.github.io/fitjourney/
+        └── peaceiris/actions-gh-pages → gh-pages 브랜치 자동 푸시
 ```
+
+### 배포 URL
+
+| 환경 | URL |
+|------|-----|
+| 라이브 데모 | https://gil22-ogogoggo1.github.io/fitjourney/ |
+| GitHub Actions | https://github.com/gil22-ogogoggo1/fitjourney/actions |
+| 저장소 | https://github.com/gil22-ogogoggo1/fitjourney |
+
+**배포 흐름**: master push → CI 통과 → `peaceiris/actions-gh-pages`가 `gh-pages` 브랜치에 정적 파일 push → GitHub Pages 자동 빌드 → 라이브 반영 (통상 1~2분)

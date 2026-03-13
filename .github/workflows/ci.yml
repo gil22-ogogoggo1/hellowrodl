@@ -20,10 +20,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: 의존성 설치
-        run: npm ci
+        run: npm install
 
       - name: 단위 테스트 실행 (커버리지 포함)
         run: npm run test:ci
@@ -43,14 +42,6 @@ jobs:
     steps:
       - name: 코드 체크아웃
         uses: actions/checkout@v4
-
-      - name: Node.js 설정
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: html-validate 설치
-        run: npm install -g html-validate
 
       - name: HTML 구조 검사
         run: |

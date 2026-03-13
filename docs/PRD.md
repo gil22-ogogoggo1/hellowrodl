@@ -3,6 +3,9 @@
 
 > 최종 업데이트: 2026-03-13 | 상태: **Sprint 1~6 + 추가 기능 전체 완료**
 
+🌐 **라이브 데모**: https://gil22-ogogoggo1.github.io/fitjourney/
+🔗 **저장소**: https://github.com/gil22-ogogoggo1/fitjourney
+
 ---
 
 ## 1. 제품 개요

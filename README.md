@@ -120,7 +120,15 @@ start fitjourney.html  # Windows
 ```bash
 npm install
 npm test           # 단위 테스트 + 커버리지
+npm run test:watch # 파일 변경 감지 모드
 ```
+
+### 배포
+
+`master` 브랜치에 push하면 GitHub Actions가 자동으로:
+1. Jest 단위 테스트 (73개) + 커버리지 검사
+2. HTML 구조 검증 (JS 로드 순서 포함)
+3. GitHub Pages 자동 배포 → **https://gil22-ogogoggo1.github.io/fitjourney/**
 
 ---
 
