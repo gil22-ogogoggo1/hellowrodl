@@ -39,8 +39,6 @@ const App = {
           </div>
         </header>
 
-        <div id="page-container"></div>
-
         <nav id="tab-nav" role="navigation" aria-label="메인 메뉴">
           <button class="tab-btn active" data-tab="dashboard" aria-label="홈 대시보드">
             <span class="tab-icon" aria-hidden="true">🏠</span>
@@ -63,6 +61,8 @@ const App = {
             <span>식사</span>
           </button>
         </nav>
+
+        <div id="page-container"></div>
 
         <div id="toast"></div>
 

@@ -29,8 +29,8 @@
   --radius-sm: 8px;
   --shadow:   0 4px 24px rgba(0, 0, 0, 0.4);
 
-  --tab-h:    64px;
-  --header-h: 56px;
+  --tab-h:    44px;
+  --header-h: 52px;
 }
 
 /* ── Reset ── */
@@ -110,7 +110,7 @@ a {
   -webkit-overflow-scrolling: touch; /* iOS 모멘텀 스크롤 */
   overscroll-behavior-y: contain;    /* 부모로 스크롤 전파 방지 */
   padding: 16px;
-  padding-bottom: calc(var(--tab-h) + 16px);
+  padding-bottom: 24px;
   scroll-behavior: smooth;
 }
 
@@ -125,51 +125,51 @@ a {
   border-radius: 2px;
 }
 
-/* ── Bottom Tab Nav ── */
+/* ── Top Tab Nav ── */
 #tab-nav {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 480px;
   height: var(--tab-h);
   display: flex;
-  background: rgba(10, 10, 15, 0.95);
-  backdrop-filter: blur(12px);
-  border-top: 1px solid var(--border);
-  z-index: 100;
+  flex-shrink: 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  z-index: 10;
 }
+
+#tab-nav::-webkit-scrollbar { display: none; }
 
 .tab-btn {
   flex: 1;
+  min-width: 60px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 5px;
   background: none;
   border: none;
+  border-bottom: 2px solid transparent;
   color: var(--text-dim);
-  font-size: 10px;
-  font-weight: 400;
-  letter-spacing: 0.02em;
-  transition: color 0.2s;
-  padding: 0 4px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 0 8px;
+  transition: color 0.2s, border-color 0.2s;
+  position: relative;
 }
 
 .tab-btn .tab-icon {
-  font-size: 20px;
+  font-size: 16px;
   line-height: 1;
-  transition: transform 0.2s;
 }
 
 .tab-btn.active {
-  color: var(--amber);
-}
-
-.tab-btn.active .tab-icon {
-  transform: scale(1.15);
+  color: var(--orange);
+  border-bottom-color: var(--orange);
+  font-weight: 600;
 }
 
 /* ── Card ── */
@@ -1106,7 +1106,7 @@ a {
 @media (min-width: 1024px) {
   #app {
     display: grid;
-    grid-template-columns: 220px 1fr;
+    grid-template-columns: 200px 1fr;
     grid-template-rows: var(--header-h) 1fr;
     height: 100%;
     border-radius: var(--radius);
@@ -1123,34 +1123,36 @@ a {
     grid-row: 2;
     flex-direction: column;
     height: 100%;
-    border-top: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-bottom: none;
     border-right: 1px solid var(--border);
-    border-radius: 0;
-    padding: 16px 0;
+    padding: 12px 0;
     justify-content: flex-start;
-    gap: 4px;
+    gap: 2px;
   }
 
   .tab-btn {
-    flex-direction: row;
+    flex: none;
+    width: 100%;
+    min-width: unset;
     justify-content: flex-start;
     gap: 10px;
-    padding: 12px 20px;
+    padding: 11px 18px;
     border-bottom: none;
-    border-radius: var(--radius-sm);
-    margin: 0 8px;
-    width: calc(100% - 16px);
+    border-left: 2px solid transparent;
+    border-radius: 0;
     font-size: 14px;
   }
 
-  .tab-btn.active::after { display: none; }
-
   .tab-btn.active {
-    background: rgba(255,120,41,0.12);
+    border-left-color: var(--orange);
+    border-bottom-color: transparent;
+    background: rgba(255,120,41,0.08);
   }
 
-  .tab-icon {
-    font-size: 18px;
+  .tab-btn .tab-icon {
+    font-size: 17px;
   }
 
   #page-container {
