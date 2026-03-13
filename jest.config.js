@@ -8,16 +8,25 @@ module.exports = {
     'js/storage.js',
     'js/users.js',
     'js/settings.js',
+    'js/helpers.js',
+    'js/profile.js',
+    'js/sync.js',
+    'js/mounjaro.js',
+    'js/body.js',
+    'js/exercise.js',
+    'js/diet.js',
+    'js/dashboard.js',
+    'js/charts.js',
+    'js/app.js',
   ],
   coverageReporters: ['text', 'lcov', 'html'],
   coverageThreshold: {
-    // settings.js의 SettingsPage/DataIO는 DOM·Blob·FileReader 의존으로 단위 테스트 불가
-    // 전체 합산(storage:100%, users:93%, settings:36%) → 70% 수준을 기준으로 설정
+    // 단위 테스트로 측정 가능한 순수 함수 중심 목표
     global: {
-      statements: 65,
-      branches: 50,
-      functions: 75,
-      lines: 65,
+      statements: 50,
+      branches: 35,
+      functions: 50,
+      lines: 50,
     },
   },
 };

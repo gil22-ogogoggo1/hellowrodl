@@ -39,35 +39,36 @@ const App = {
           </div>
         </header>
 
-        <nav id="tab-nav" role="navigation" aria-label="메인 메뉴">
-          <button class="tab-btn active" data-tab="dashboard" aria-label="홈 대시보드">
+        <nav id="tab-nav" role="tablist" aria-label="메인 메뉴">
+          <button class="tab-btn active" role="tab" data-tab="dashboard" aria-selected="true" aria-label="홈 대시보드">
             <span class="tab-icon" aria-hidden="true">🏠</span>
             <span>홈</span>
           </button>
-          <button class="tab-btn" data-tab="mounjaro" aria-label="투약 기록">
+          <button class="tab-btn" role="tab" data-tab="mounjaro" aria-selected="false" aria-label="투약 기록">
             <span class="tab-icon" aria-hidden="true">💉</span>
             <span>투약</span>
           </button>
-          <button class="tab-btn" data-tab="body" aria-label="체중 인바디 기록">
+          <button class="tab-btn" role="tab" data-tab="body" aria-selected="false" aria-label="체중 인바디 기록">
             <span class="tab-icon" aria-hidden="true">⚖️</span>
             <span>체중</span>
           </button>
-          <button class="tab-btn" data-tab="exercise" aria-label="운동 기록">
+          <button class="tab-btn" role="tab" data-tab="exercise" aria-selected="false" aria-label="운동 기록">
             <span class="tab-icon" aria-hidden="true">🏃</span>
             <span>운동</span>
           </button>
-          <button class="tab-btn" data-tab="diet" aria-label="식사 기록">
+          <button class="tab-btn" role="tab" data-tab="diet" aria-selected="false" aria-label="식사 기록">
             <span class="tab-icon" aria-hidden="true">🥗</span>
             <span>식사</span>
           </button>
         </nav>
 
-        <div id="page-container"></div>
+        <div id="page-container" role="tabpanel" aria-live="polite"></div>
 
-        <div id="toast"></div>
+        <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
         <!-- 편집 / 사용자 바텀시트 모달 -->
-        <div id="edit-modal" class="modal-overlay hidden">
+        <div id="edit-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title-sr">
+          <span id="modal-title-sr" class="sr-only">편집 모달</span>
           <div class="modal-sheet">
             <div class="modal-handle"></div>
             <div id="edit-modal-content"></div>
@@ -88,6 +89,16 @@ const App = {
         App.Modal.close();
       }
     });
+
+    // ESC 키로 모달 닫기
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('edit-modal');
+        if (modal && !modal.classList.contains('hidden')) {
+          App.Modal.close();
+        }
+      }
+    });
   },
 
   navigateTo(tab) {
@@ -96,7 +107,9 @@ const App = {
 
     // 탭 버튼 활성화 (설정 페이지는 탭 하이라이트 없음)
     document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.tab === tab);
+      const isActive = btn.dataset.tab === tab;
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
     });
 
     // 헤더 타이틀
@@ -272,3 +285,8 @@ function daysFromNow(dateStr) {
 document.addEventListener('DOMContentLoaded', () => {
   App.init();
 });
+
+// ── 테스트 환경 모듈 내보내기 (Node.js/Jest) ──
+if (typeof module !== 'undefined') {
+  module.exports = { App, showToast, formatDate, formatDateShort, todayStr, daysFromNow };
+}

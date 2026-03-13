@@ -279,7 +279,7 @@ const Charts = {
     });
   },
 
-  // ── 칼로리 추이 라인 (최근 14일) ──
+  // ── 칼로리 추이 막대 (최근 14일) ──
   renderCalorieTrendChart(canvasId, records) {
     if (!this._guard(canvasId)) return;
     const canvas = document.getElementById(canvasId);
@@ -342,3 +342,8 @@ const Charts = {
     });
   },
 };
+
+// ── 테스트 환경 모듈 내보내기 (Node.js/Jest) ──
+if (typeof module !== 'undefined') {
+  module.exports = { Charts };
+}

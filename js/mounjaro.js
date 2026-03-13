@@ -117,6 +117,12 @@ const MounjaroPage = {
     return this.DRUGS[key]?.interval ?? 7;
   },
 
+  // ── 공통 리렌더 시퀀스 ──────────────────────────────────────
+  _refreshAll() {
+    this.renderNextDose();
+    this.renderList();
+  },
+
   save() {
     const drugName = document.getElementById('mj-drug').value;
     const date     = document.getElementById('mj-date').value;
@@ -137,8 +143,7 @@ const MounjaroPage = {
     document.getElementById('mj-memo').value = '';
     document.querySelectorAll('.mj-side-effect:checked').forEach(el => el.checked = false);
 
-    this.renderNextDose();
-    this.renderList();
+    this._refreshAll();
   },
 
   renderNextDose() {
@@ -187,11 +192,7 @@ const MounjaroPage = {
     if (!el) return;
 
     if (records.length === 0) {
-      el.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">💉</div>
-          <p>아직 투약 기록이 없습니다.</p>
-        </div>`;
+      el.innerHTML = RenderHelper.emptyState('💉', '아직 투약 기록이 없습니다.');
       return;
     }
 
@@ -302,15 +303,18 @@ const MounjaroPage = {
     Storage.update('mounjaro', id, { date, drugName, dose, site, cost: cost ? Number(cost) : null, sideEffects, memo });
     App.Modal.close();
     showToast('✅ 수정되었습니다.');
-    this.renderNextDose();
-    this.renderList();
+    this._refreshAll();
   },
 
   remove(id) {
     if (!confirm('이 기록을 삭제하시겠습니까?')) return;
     Storage.remove('mounjaro', id);
     showToast('삭제되었습니다.');
-    this.renderNextDose();
-    this.renderList();
+    this._refreshAll();
   },
 };
+
+// ── 테스트 환경 모듈 내보내기 (Node.js/Jest) ──
+if (typeof module !== 'undefined') {
+  module.exports = { MounjaroPage };
+}

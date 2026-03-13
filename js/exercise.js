@@ -119,6 +119,12 @@ const ExercisePage = {
     this.renderList();
   },
 
+  // ── 공통 리렌더 시퀀스 ──────────────────────────────────────
+  _refreshAll() {
+    this.renderSummary();
+    this.renderList();
+  },
+
   setRowHTML(idx) {
     return `
       <div class="form-row set-row" data-idx="${idx}" style="margin-bottom:8px; grid-template-columns: 2fr 1fr 1fr 1fr auto;">
@@ -239,8 +245,7 @@ const ExercisePage = {
       setsList.innerHTML = this.setRowHTML(0);
     }
 
-    this.renderSummary();
-    this.renderList();
+    this._refreshAll();
   },
 
   renderFreqChart() {
@@ -295,11 +300,7 @@ const ExercisePage = {
     if (!el) return;
 
     if (records.length === 0) {
-      el.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">🏃</div>
-          <p>아직 운동 기록이 없습니다.</p>
-        </div>`;
+      el.innerHTML = RenderHelper.emptyState('🏃', '아직 운동 기록이 없습니다.');
       return;
     }
 
@@ -428,19 +429,17 @@ const ExercisePage = {
     Storage.update('exercise', id, changes);
     App.Modal.close();
     showToast('✅ 수정되었습니다.');
-    this.renderSummary();
-    this.renderList();
+    this._refreshAll();
   },
 
   remove(id) {
     if (!confirm('이 기록을 삭제하시겠습니까?')) return;
     Storage.remove('exercise', id);
     showToast('삭제되었습니다.');
-    this.renderSummary();
-    this.renderList();
+    this._refreshAll();
   },
 
-  // ── 삼성헬스 운동 ZIP / CSV 가져오기 ───────────────────────
+  // ── 삼성헬스 운동 ZIP / CSV 가져오기 ──────────────────────
   async importFile(input) {
     const file = input.files[0];
     if (!file) return;
@@ -473,3 +472,8 @@ const ExercisePage = {
     input.value = '';
   },
 };
+
+// ── 테스트 환경 모듈 내보내기 (Node.js/Jest) ──
+if (typeof module !== 'undefined') {
+  module.exports = { ExercisePage };
+}

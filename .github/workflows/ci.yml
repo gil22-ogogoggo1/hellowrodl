@@ -49,6 +49,7 @@ jobs:
           echo "=== fitjourney.html 파일 크기 및 기본 검사 ==="
           wc -l fitjourney.html
           grep -q "storage.js"  fitjourney.html && echo "✅ storage.js 로드 확인" || echo "❌ storage.js 누락"
+          grep -q "helpers.js"  fitjourney.html && echo "✅ helpers.js 로드 확인" || echo "❌ helpers.js 누락"
           grep -q "app.js"      fitjourney.html && echo "✅ app.js 로드 확인"     || echo "❌ app.js 누락"
           grep -q "style.css"   fitjourney.html && echo "✅ style.css 로드 확인"  || echo "❌ style.css 누락"
           grep -q "chart.js"    fitjourney.html && echo "✅ Chart.js CDN 확인"    || echo "❌ Chart.js 누락"
@@ -56,7 +57,7 @@ jobs:
           python3 -c "
           with open('fitjourney.html') as f:
               content = f.read()
-          scripts = ['storage.js', 'users.js', 'charts.js', 'profile.js', 'sync.js', 'mounjaro.js', 'body.js', 'exercise.js', 'diet.js', 'dashboard.js', 'settings.js', 'app.js']
+          scripts = ['storage.js', 'users.js', 'helpers.js', 'charts.js', 'profile.js', 'sync.js', 'mounjaro.js', 'body.js', 'exercise.js', 'diet.js', 'dashboard.js', 'settings.js', 'app.js']
           positions = [(s, content.find(s)) for s in scripts]
           for name, pos in positions:
               status = '✅' if pos != -1 else '❌'
@@ -67,6 +68,39 @@ jobs:
           print(f'스크립트 로드 순서 올바름: {is_sorted}')
           assert is_sorted, 'JS 로드 순서가 올바르지 않습니다!'
           "
+
+  # ── E2E 테스트 (Playwright) ───────────────
+  e2e:
+    name: E2E 테스트 (Playwright)
+    runs-on: ubuntu-latest
+    needs: [test]
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Node.js 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 의존성 설치
+        run: npm install
+
+      - name: Playwright 브라우저 설치
+        run: npx playwright install chromium --with-deps
+
+      - name: E2E 테스트 실행
+        run: BASE_URL=http://localhost:8080 npx playwright test --project="데스크톱 (1024px)"
+        env:
+          CI: true
+
+      - name: E2E 테스트 결과 업로드
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-report
+          path: e2e-report/
 
   # ── GitHub Pages 배포 ──────────────────────
   deploy:

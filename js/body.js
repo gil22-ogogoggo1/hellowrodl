@@ -436,11 +436,7 @@ const BodyPage = {
     if (!el) return;
 
     if (records.length === 0) {
-      el.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">⚖️</div>
-          <p>아직 체중 기록이 없습니다.</p>
-        </div>`;
+      el.innerHTML = RenderHelper.emptyState('⚖️', '아직 체중 기록이 없습니다.');
       return;
     }
 
@@ -465,6 +461,15 @@ const BodyPage = {
         </div>
       `;
     }).join('');
+  },
+
+  // ── 공통 리렌더 시퀀스 ──────────────────────────────────────
+  _refreshAll() {
+    this.renderProfile();
+    this.renderComparison();
+    this.renderSummary();
+    this.renderChart();
+    this.renderList();
   },
 
   // ── 저장 ─────────────────────────────────────────────────────
@@ -502,11 +507,7 @@ const BodyPage = {
     document.getElementById('body-visceral').value = '';
     document.getElementById('body-memo').value    = '';
 
-    this.renderProfile();
-    this.renderComparison();
-    this.renderSummary();
-    this.renderChart();
-    this.renderList();
+    this._refreshAll();
   },
 
   // ── 편집 모달 ─────────────────────────────────────────────────
@@ -584,22 +585,14 @@ const BodyPage = {
 
     App.Modal.close();
     showToast('✅ 수정되었습니다.');
-    this.renderProfile();
-    this.renderComparison();
-    this.renderSummary();
-    this.renderChart();
-    this.renderList();
+    this._refreshAll();
   },
 
   remove(id) {
     if (!confirm('이 기록을 삭제하시겠습니까?')) return;
     Storage.remove('body', id);
     showToast('삭제되었습니다.');
-    this.renderProfile();
-    this.renderComparison();
-    this.renderSummary();
-    this.renderChart();
-    this.renderList();
+    this._refreshAll();
   },
 
   // ── Bluetooth 체중계 연결 ───────────────────────────────────
@@ -656,11 +649,7 @@ const BodyPage = {
     document.getElementById('bt-result').innerHTML =
       `<p class="sync-success">✅ 저장되었습니다.</p>`;
     showToast('✅ 체중계 측정값이 저장되었습니다.');
-    this.renderProfile();
-    this.renderComparison();
-    this.renderSummary();
-    this.renderChart();
-    this.renderList();
+    this._refreshAll();
   },
 
   // ── 삼성헬스 ZIP / CSV 가져오기 ────────────────────────────
@@ -688,8 +677,7 @@ const BodyPage = {
       result.innerHTML = `<p class="sync-success">✅ ${res.success}건 추가 / ${res.skip}건 건너뜀</p>`;
       if (res.success > 0) {
         showToast(`✅ 체중 데이터 ${res.success}건을 가져왔습니다.`);
-        this.renderProfile(); this.renderComparison();
-        this.renderSummary(); this.renderChart(); this.renderList();
+        this._refreshAll();
       }
     } catch (err) {
       result.innerHTML = `<p class="sync-error">⚠️ ${escapeHTML(err.message)}</p>`;
@@ -711,8 +699,7 @@ const BodyPage = {
       result.innerHTML = `<p class="sync-success">✅ ${res.success}건 추가 / ${res.skip}건 건너뜀</p>`;
       if (res.success > 0) {
         showToast(`✅ ${res.success}건을 가져왔습니다.`);
-        this.renderProfile(); this.renderComparison();
-        this.renderSummary(); this.renderChart(); this.renderList();
+        this._refreshAll();
       } else {
         result.innerHTML += `<p class="sync-error" style="margin-top:4px;">컬럼을 인식하지 못했습니다. 샘플 CSV 양식을 참고해주세요.</p>`;
       }
@@ -733,3 +720,8 @@ const BodyPage = {
     a.click();
   },
 };
+
+// ── 테스트 환경 모듈 내보내기 (Node.js/Jest) ──
+if (typeof module !== 'undefined') {
+  module.exports = { BodyPage };
+}

@@ -26,6 +26,7 @@ css/
 js/
   storage.js                ← LocalStorage CRUD + escapeHTML() + migrate() [먼저 로드]
   users.js                  ← 다중 사용자 관리
+  helpers.js                ← FormHelper + RenderHelper 공통 유틸
   charts.js                 ← Chart.js 래퍼
   profile.js                ← 사용자 프로필 + 또래 평균 비교
   sync.js                   ← 삼성헬스 연동, 블루투스 체중계

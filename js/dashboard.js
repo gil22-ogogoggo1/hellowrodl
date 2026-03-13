@@ -346,3 +346,8 @@ const Dashboard = {
       </div>`;
   },
 };
+
+// ── 테스트 환경 모듈 내보내기 (Node.js/Jest) ──
+if (typeof module !== 'undefined') {
+  module.exports = { Dashboard };
+}

@@ -74,6 +74,12 @@ const DietPage = {
     this.renderList();
   },
 
+  // ── 공통 리렌더 시퀀스 ──────────────────────────────────────
+  _refreshAll() {
+    this.renderTodaySummary();
+    this.renderList();
+  },
+
   save() {
     const date     = document.getElementById('diet-date').value;
     const meal     = document.getElementById('diet-meal').value;
@@ -98,8 +104,7 @@ const DietPage = {
     document.getElementById('diet-calories').value = '';
     document.getElementById('diet-memo').value = '';
 
-    this.renderTodaySummary();
-    this.renderList();
+    this._refreshAll();
   },
 
   renderCalChart() {
@@ -145,11 +150,7 @@ const DietPage = {
     if (!el) return;
 
     if (records.length === 0) {
-      el.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">🥗</div>
-          <p>아직 식사 기록이 없습니다.</p>
-        </div>`;
+      el.innerHTML = RenderHelper.emptyState('🥗', '아직 식사 기록이 없습니다.');
       return;
     }
 
@@ -251,15 +252,18 @@ const DietPage = {
 
     App.Modal.close();
     showToast('✅ 수정되었습니다.');
-    this.renderTodaySummary();
-    this.renderList();
+    this._refreshAll();
   },
 
   remove(id) {
     if (!confirm('이 기록을 삭제하시겠습니까?')) return;
     Storage.remove('diet', id);
     showToast('삭제되었습니다.');
-    this.renderTodaySummary();
-    this.renderList();
+    this._refreshAll();
   },
 };
+
+// ── 테스트 환경 모듈 내보내기 (Node.js/Jest) ──
+if (typeof module !== 'undefined') {
+  module.exports = { DietPage };
+}
