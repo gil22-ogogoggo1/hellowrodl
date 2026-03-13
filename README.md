@@ -3,7 +3,7 @@
 > **"투약과 함께하는 건강한 변화"**
 > GLP-1 투약자가 투약·체중·운동·식사를 한곳에서 기록하고 시각적으로 추적하는 개인 건강 관리 웹앱
 
-🌐 **[라이브 데모](https://gil22-ogogogogo1.github.io/hellowrodl/)** | 📋 **[PRD](docs/PRD.md)**
+🌐 **[라이브 데모](https://gil22-ogogogogo1.github.io/fitjourney/)** | 📋 **[PRD](docs/PRD.md)**
 
 ---
 
@@ -105,8 +105,8 @@ jest.config.js              ← Jest 환경 설정
 
 ### 로컬 실행 (서버 불필요)
 ```bash
-git clone https://github.com/gil22-ogogogogo1/hellowrodl.git
-cd hellowrodl
+git clone https://github.com/gil22-ogogogogo1/fitjourney.git
+cd fitjourney
 # fitjourney.html을 브라우저에서 직접 열기
 open fitjourney.html   # macOS
 start fitjourney.html  # Windows
