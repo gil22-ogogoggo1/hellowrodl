@@ -1,26 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hello World</title>
-  <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      font-family: sans-serif;
-      background-color: #f0f0f0;
-    }
-    h1 {
-      font-size: 3rem;
-      color: #333;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>핏저니 | FitJourney</title>
+
+  <!-- 폰트 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+  <!-- 앱 스타일 -->
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <h1>Hello World</h1>
+
+  <!-- JS 모듈 로딩 순서: storage → charts → 각 페이지 → app (마지막) -->
+  <script src="js/storage.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/mounjaro.js"></script>
+  <script src="js/body.js"></script>
+  <script src="js/exercise.js"></script>
+  <script src="js/diet.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/app.js"></script>
+
 </body>
 </html>
